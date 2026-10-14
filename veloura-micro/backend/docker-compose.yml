@@ -1,0 +1,49 @@
+version: "3.8"
+
+# Optional: run all four microservices together with `docker compose up --build`.
+# All of them connect to the SAME MongoDB Atlas database via MONGODB_URI,
+# which you should set in a .env file next to this docker-compose.yml
+# (or export in your shell) before running.
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      PRODUCT_SERVICE_URL: http://product-service:5001
+      CART_SERVICE_URL: http://cart-service:5002
+      ORDER_SERVICE_URL: http://order-service:5003
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:5173}
+    depends_on:
+      - product-service
+      - cart-service
+      - order-service
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      MONGODB_URI: ${MONGODB_URI}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:5173}
+
+  cart-service:
+    build: ./cart-service
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      MONGODB_URI: ${MONGODB_URI}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:5173}
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "5003:5003"
+    environment:
+      PORT: 5003
+      MONGODB_URI: ${MONGODB_URI}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:5173}
