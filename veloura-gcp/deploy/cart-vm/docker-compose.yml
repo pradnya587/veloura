@@ -1,0 +1,25 @@
+services:
+  cart-db:
+    image: mongo:7
+    container_name: cart-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - cart_db_data:/data/db
+    restart: unless-stopped
+
+  cart-service:
+    build: ../../backend/cart-service
+    container_name: cart-service
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      MONGODB_URI: mongodb://cart-db:27017/cart_db
+      PRODUCT_SERVICE_URL: http://${PRODUCT_IP}:5001
+    depends_on:
+      - cart-db
+    restart: unless-stopped
+
+volumes:
+  cart_db_data:

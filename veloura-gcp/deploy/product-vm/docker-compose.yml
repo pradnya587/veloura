@@ -1,0 +1,24 @@
+services:
+  product-db:
+    image: mongo:7
+    container_name: product-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - product_db_data:/data/db
+    restart: unless-stopped
+
+  product-service:
+    build: ../../backend/product-service
+    container_name: product-service
+    ports:
+      - "5001:5001"
+    environment:
+      PORT: 5001
+      MONGODB_URI: mongodb://product-db:27017/product_db
+    depends_on:
+      - product-db
+    restart: unless-stopped
+
+volumes:
+  product_db_data:
